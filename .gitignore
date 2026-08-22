@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Arduino build artifacts
+build/
+*.hex
+*.bin
+
+# Local config (real house measurements — you may want to keep this
+# private rather than public on GitHub)
+config/node_positions.json
+
+# OS/editor cruft
+.DS_Store
+.vscode/
+*.swp
