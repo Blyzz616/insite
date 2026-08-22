@@ -4,16 +4,7 @@ import * as THREE from "three";
 // CONFIG
 // ---------------------------------------------------------------------
 const WS_URL = `ws://${location.hostname}:8765`;
-
-// Placeholder house dimensions in meters — replace with your real
-// floorplan. Simplest upgrade path: define a list of room boxes (min/max
-// corners) below instead of one big shell, so walls between rooms show
-// up too.
-const HOUSE = {
-  width: 10,   // x
-  height: 5,   // y (two floors ~2.5m each, adjust to taste)
-  depth: 12,   // z
-};
+const FLOORPLAN_URL = "../config/floorplan.json";
 
 // ---------------------------------------------------------------------
 // SCENE SETUP
@@ -25,8 +16,6 @@ scene.background = new THREE.Color(0x0b0e14);
 const camera = new THREE.PerspectiveCamera(
   55, window.innerWidth / window.innerHeight, 0.1, 200
 );
-camera.position.set(HOUSE.width * 1.4, HOUSE.height * 2.2, HOUSE.depth * 1.4);
-camera.lookAt(HOUSE.width / 2, HOUSE.height / 2, HOUSE.depth / 2);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,8 +34,8 @@ window.addEventListener("resize", () => {
 let isDragging = false;
 let prevMouse = { x: 0, y: 0 };
 let cameraAngle = { theta: Math.PI * 0.25, phi: Math.PI * 0.3 };
-let cameraDistance = Math.max(HOUSE.width, HOUSE.depth) * 1.8;
-const center = new THREE.Vector3(HOUSE.width / 2, HOUSE.height / 2, HOUSE.depth / 2);
+let cameraDistance = 20; // overwritten once the floorplan bounds are known
+const center = new THREE.Vector3(0, 0, 0); // overwritten once floorplan loads
 
 function updateCameraFromOrbit() {
   const x = center.x + cameraDistance * Math.sin(cameraAngle.phi) * Math.cos(cameraAngle.theta);
@@ -72,7 +61,7 @@ window.addEventListener("mousemove", (e) => {
   updateCameraFromOrbit();
 });
 renderer.domElement.addEventListener("wheel", (e) => {
-  cameraDistance = Math.min(Math.max(cameraDistance + e.deltaY * 0.02, 3), 60);
+  cameraDistance = Math.min(Math.max(cameraDistance + e.deltaY * 0.02, 3), 80);
   updateCameraFromOrbit();
 });
 
@@ -84,37 +73,95 @@ dirLight.position.set(10, 20, 10);
 scene.add(dirLight);
 
 // ---------------------------------------------------------------------
-// HOUSE SHELL (placeholder — replace with real floorplan geometry)
+// FLOORPLAN (loaded from config/floorplan.json — see that file's
+// comments for how coordinates are defined, and its caveats about
+// approximation vs. laser-measured precision)
 // ---------------------------------------------------------------------
-function buildHouseShell() {
+async function loadFloorplan() {
+  const res = await fetch(FLOORPLAN_URL);
+  if (!res.ok) {
+    throw new Error(`failed to load floorplan.json: ${res.status}`);
+  }
+  return res.json();
+}
+
+function buildFloorplan(data) {
   const group = new THREE.Group();
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
 
-  const shellGeo = new THREE.BoxGeometry(HOUSE.width, HOUSE.height, HOUSE.depth);
-  const shellMat = new THREE.MeshStandardMaterial({
-    color: 0x3a6ea5,
-    transparent: true,
-    opacity: 0.06,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  });
-  const shellMesh = new THREE.Mesh(shellGeo, shellMat);
-  shellMesh.position.set(HOUSE.width / 2, HOUSE.height / 2, HOUSE.depth / 2);
-  group.add(shellMesh);
+  for (const room of data.rooms) {
+    const level = data.levels[room.level];
+    const yBase = level.y_base;
+    const yTop = yBase + level.ceiling_height;
+    const cx = room.x + room.w / 2;
+    const cz = room.z + room.d / 2;
+    const cy = yBase + level.ceiling_height / 2;
 
-  const edges = new THREE.EdgesGeometry(shellGeo);
-  const wireMat = new THREE.LineBasicMaterial({ color: 0x6ea8e7, transparent: true, opacity: 0.4 });
-  const wireframe = new THREE.LineSegments(edges, wireMat);
-  wireframe.position.copy(shellMesh.position);
-  group.add(wireframe);
+    const geo = new THREE.BoxGeometry(room.w, level.ceiling_height, room.d);
+    const color = new THREE.Color(room.color || "#3a6ea5");
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      transparent: true,
+      opacity: room.exterior ? 0.03 : 0.08,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(cx, cy, cz);
+    group.add(mesh);
 
-  // Ground grid for spatial reference
-  const grid = new THREE.GridHelper(Math.max(HOUSE.width, HOUSE.depth) * 1.5, 20, 0x334455, 0x1a2230);
-  grid.position.set(HOUSE.width / 2, 0, HOUSE.depth / 2);
+    const edges = new THREE.EdgesGeometry(geo);
+    const wireMat = new THREE.LineBasicMaterial({
+      color, transparent: true, opacity: room.exterior ? 0.25 : 0.55,
+    });
+    const wireframe = new THREE.LineSegments(edges, wireMat);
+    wireframe.position.copy(mesh.position);
+    group.add(wireframe);
+
+    // Floor-level room label
+    const label = makeRoomLabelSprite(room.label);
+    label.position.set(cx, yBase + 0.05, cz);
+    group.add(label);
+
+    minX = Math.min(minX, room.x); maxX = Math.max(maxX, room.x + room.w);
+    minZ = Math.min(minZ, room.z); maxZ = Math.max(maxZ, room.z + room.d);
+    minY = Math.min(minY, yBase); maxY = Math.max(maxY, yTop);
+  }
+
+  // Ground grid for spatial reference, sized to the floorplan extent
+  const spanX = maxX - minX, spanZ = maxZ - minZ;
+  const gridSize = Math.max(spanX, spanZ) * 1.6;
+  const grid = new THREE.GridHelper(gridSize, 20, 0x334455, 0x1a2230);
+  grid.position.set((minX + maxX) / 2, minY, (minZ + maxZ) / 2);
   group.add(grid);
 
-  return group;
+  return {
+    group,
+    bounds: { minX, maxX, minZ, maxZ, minY, maxY },
+  };
 }
-scene.add(buildHouseShell());
+
+function makeRoomLabelSprite(text) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillStyle = "rgba(230, 230, 230, 0.55)";
+  ctx.textAlign = "center";
+  ctx.fillText(text, canvas.width / 2, 40);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(1.8, 0.45, 1);
+  // Note: three.js Sprites always billboard to face the camera, so this
+  // is not really "flat on the floor" — it'll tilt to face you as you
+  // orbit. Good enough for a schematic room label; swap for a
+  // CSS2DRenderer/HTML overlay later if you want true floor-plane text.
+  return sprite;
+}
 
 // ---------------------------------------------------------------------
 // NODE MARKERS (fixed sensor positions)
@@ -289,11 +336,36 @@ function handleState(state) {
   pruneStalePersonMarkers(seenIds);
 }
 
-connect();
+async function init() {
+  let floorplanData;
+  try {
+    floorplanData = await loadFloorplan();
+  } catch (err) {
+    console.error("Could not load floorplan.json:", err);
+    statusEl.textContent = "floorplan failed to load — check config/floorplan.json";
+    statusEl.className = "bad";
+    return;
+  }
 
-// ---------------------------------------------------------------------
-// RENDER LOOP
-// ---------------------------------------------------------------------
+  const { group, bounds } = buildFloorplan(floorplanData);
+  scene.add(group);
+
+  // Point the orbit camera at the actual center of the loaded floorplan
+  // instead of the old hardcoded placeholder box.
+  center.set(
+    (bounds.minX + bounds.maxX) / 2,
+    (bounds.minY + bounds.maxY) / 2,
+    (bounds.minZ + bounds.maxZ) / 2
+  );
+  const spanX = bounds.maxX - bounds.minX;
+  const spanZ = bounds.maxZ - bounds.minZ;
+  cameraDistance = Math.max(spanX, spanZ) * 1.6;
+  updateCameraFromOrbit();
+
+  connect();
+  animate();
+}
+
 function animate() {
   requestAnimationFrame(animate);
   // Billboard the status sprites toward the camera (Sprite does this
@@ -301,4 +373,5 @@ function animate() {
   // if you switch to a non-Sprite label approach later).
   renderer.render(scene, camera);
 }
-animate();
+
+init();
