@@ -1,0 +1,7 @@
+{
+  "_comment": "Positions in meters, in a coordinate system you define. A common choice: origin at one corner of the ground floor at floor level, x = along the front of the house, y = height (floor to ceiling), z = depth into the house. Rename this file to node_positions.json and fill in your real measurements.",
+
+  "node-01": [1.2, 2.4, 0.5],
+  "node-02": [5.8, 2.4, 0.5],
+  "node-03": [1.2, 2.4, 6.0]
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>InSite</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="hud">
+    <div id="conn-status">connecting...</div>
+    <div id="legend">
+      <span class="dot online"></span> node active &nbsp;
+      <span class="dot idle"></span> node idle &nbsp;
+      <span class="dot stale"></span> node stale/offline
+    </div>
+  </div>
+  <div id="scene-container"></div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
