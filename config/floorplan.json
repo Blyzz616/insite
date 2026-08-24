@@ -14,9 +14,9 @@
     { "id": "bath_main",   "level": "main",  "label": "Bath",           "exterior": false, "x": 3.48,  "z": 0.0,    "w": 2.591, "d": 3.531, "color": "#4a7a9a" },
     { "id": "kitchen",     "level": "main",  "label": "Kitchen",        "exterior": false, "x": 6.071, "z": 0.0,    "w": 2.997, "d": 3.734, "color": "#c98a3f" },
     { "id": "bed_mid",     "level": "main",  "label": "Bedroom",        "exterior": false, "x": 0.0,   "z": 2.896,  "w": 3.48,  "d": 2.489, "color": "#3a6ea5" },
-    { "id": "dining",      "level": "main",  "label": "Dining Room",    "exterior": false, "x": 6.071,  "z": 3.531,  "w": 2.997, "d": 2.413, "color": "#8a6ea5" },
+    { "id": "dining",      "level": "main",  "label": "Dining Room",    "exterior": false, "x": 5.359,  "z": 3.734,  "w": 3.683, "d": 2.413, "color": "#8a6ea5" },
     { "id": "primary_bed", "level": "main",  "label": "Primary Bedroom","exterior": false, "x": 0.0,   "z": 5.385,  "w": 4.496, "d": 3.073, "color": "#3a6ea5" },
-    { "id": "living",      "level": "main",  "label": "Living Room",    "exterior": false, "x": 6.071, "z": 5.944,  "w": 2.997, "d": 2.514, "color": "#6ea87a" },
+    { "id": "living",      "level": "main",  "label": "Living Room",    "exterior": false, "x": 5.359, "z": 6.147,  "w": 3.683, "d": 2.514, "color": "#6ea87a" },
 
     { "id": "patio",       "level": "lower", "label": "Patio",          "exterior": true,  "x": 0.0,   "z": -5.512, "w": 9.398, "d": 5.512, "color": "#4a5a6a" },
     { "id": "rec_room",    "level": "lower", "label": "Rec Room",       "exterior": false, "x": 0.0,   "z": 0.0,    "w": 3.378, "d": 6.477, "color": "#6ea87a" },
