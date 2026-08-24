@@ -21,11 +21,11 @@
     { "id": "patio",       "level": "lower", "label": "Patio",          "exterior": true,  "x": 0.0,   "z": -5.512, "w": 9.398, "d": 5.512, "color": "#4a5a6a" },
     { "id": "rec_room",    "level": "lower", "label": "Play Room",      "exterior": false, "x": 0.0,   "z": 0.0,    "w": 3.378, "d": 6.477, "color": "#6ea87a" },
     { "id": "bath_lower",  "level": "lower", "label": "Bath",           "exterior": false, "x": 3.378, "z": 0.0,    "w": 2.108, "d": 1.854, "color": "#4a7a9a" },
-    { "id": "bed_lower",   "level": "lower", "label": "Bedroom",        "exterior": false, "x": 5.486, "z": 0.0,    "w": 3.582,  "d": 3.2,   "color": "#3a6ea5" },
+    { "id": "bed_lower",   "level": "lower", "label": "Bedroom",        "exterior": false, "x": 5.486, "z": 0.0,    "w": 3.582, "d": 3.2,   "color": "#3a6ea5" },
     { "id": "storage",     "level": "lower", "label": "Moose Room",     "exterior": false, "x": 5.486, "z": -2.972, "w": 3.582, "d": 2.972, "color": "#7a7a7a" },
     { "id": "laundry",     "level": "lower", "label": "Laundry",        "exterior": false, "x": 3.378, "z": 3.251,  "w": 1.981, "d": 2.794, "color": "#4a7a9a" },
-    { "id": "flex_area",   "level": "lower", "label": "Lunch Room",     "exterior": false, "x": 5.359, "z": 3.2,    "w": 3.683, "d": 4.42,  "color": "#8a6ea5" },
+    { "id": "flex_area",   "level": "lower", "label": "Flex Area",      "exterior": false, "x": 5.359, "z": 3.2,    "w": 3.683, "d": 4.42,  "color": "#8a6ea5" },
     { "id": "office",      "level": "lower", "label": "Office",         "exterior": false, "x": 0.0,   "z": 6.477,  "w": 2.235, "d": 1.981, "color": "#c98a3f" },
-    { "id": "foyer",       "level": "lower", "label": "Foyer",          "exterior": false, "x": 2.235, "z": 6.477,  "w": 1.981, "d": 1.981, "color": "#666666" },
-    { "id": "other",       "level": "lower", "label": "Other",          "exterior": false, "x": 5.385, "z": 6.477,  "w": 3.683, "d": 2.581, "color": "#666666" }  ]
+    { "id": "foyer",       "level": "lower", "label": "Foyer",          "exterior": false, "x": 2.235, "z": 6.477,  "w": 3.15,  "d": 1.981, "color": "#666666" },
+    { "id": "other",       "level": "lower", "label": "Other",          "exterior": false, "x": 5.385, "z": 6.477,  "w": 3.683, "d": 2.581, "color": "#666666" }
 }
