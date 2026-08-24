@@ -53,3 +53,10 @@ html, body {
 .dot.online { background: #6ee7a8; }
 .dot.idle   { background: #6ea8e7; }
 .dot.stale  { background: #666; }
+
+#version-tag {
+  margin-top: 6px;
+  opacity: 0.4;
+  font-size: 11px;
+  font-family: monospace;
+}
