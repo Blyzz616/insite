@@ -74,7 +74,7 @@ window.addEventListener("mousemove", (e) => {
   // ROTATE_DIRECTION: if dragging left still spins the view right (or
   // vice versa), this is the ONLY thing to flip — change 1 to -1 below,
   // save, git pull, hard-refresh. No need to wait on another round trip.
-  const ROTATE_DIRECTION = 1;
+  const ROTATE_DIRECTION = -1;
   cameraAngle.theta -= ROTATE_DIRECTION * dx * 0.005;
   cameraAngle.phi = Math.min(Math.max(cameraAngle.phi - dy * 0.005, 0.1), Math.PI - 0.1);
   prevMouse = { x: e.clientX, y: e.clientY };
