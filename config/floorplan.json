@@ -1,6 +1,8 @@
 {
   "_comment": "Room geometry for 3356 270A Street, Langley BC, derived from the listing floorplan (chrisgaundanhomes.com). Coordinates in meters, origin at NW corner of the main floor footprint, x = east, z = south, y = floor height offset. Positions are a best-effort layout matching room adjacency and relative size from the labeled dimensions on the flyer -- NOT laser-measured wall corners. Listing itself notes measurements are approximate within +/-2%. Adjust freely once you've measured your actual rooms, especially if you want sensor-node coordinates to line up precisely for triangulation later.",
 
+  "_alignment_fix": "Main floor sits directly above the lower floor (same building, walkout basement), so exterior walls must line up between levels -- the flyer draws the two floors side-by-side for readability, which doesn't preserve that constraint. Per a manual wall-by-wall check against the flyer (Aug 2026): west wall (x=0) and north interior wall (z=0) already matched between floors. South wall did not -- primary_bed's south edge (z=8.458) is the reference; living/office/foyer/other depths below were adjusted so office's south wall sits flush under primary_bed's (previously protruded ~0.84m/2.75ft past it), and 'other' is set ~0.6m south of that same line to reflect a small covered-but-unwalled overhang below the main floor's living room doors, visible on the flyer as a short roofline that doesn't reach the full depth of 'other'. East wall (red on the annotated flyer) has NOT been reconciled yet -- kitchen/living's east edges and the lower floor's bed_lower/storage east edges still don't line up; flag if you want that pass done too.",
+
   "levels": {
     "main": { "y_base": 0.0, "ceiling_height": 2.388 },
     "lower": { "y_base": -2.438, "ceiling_height": 2.438 }
@@ -14,7 +16,7 @@
     { "id": "bed_mid",     "level": "main",  "label": "Bedroom",        "exterior": false, "x": 0.0,   "z": 2.896,  "w": 3.48,  "d": 2.489, "color": "#3a6ea5" },
     { "id": "dining",      "level": "main",  "label": "Dining Room",    "exterior": false, "x": 3.48,  "z": 3.531,  "w": 3.708, "d": 2.413, "color": "#8a6ea5" },
     { "id": "primary_bed", "level": "main",  "label": "Primary Bedroom","exterior": false, "x": 0.0,   "z": 5.385,  "w": 4.496, "d": 3.073, "color": "#3a6ea5" },
-    { "id": "living",      "level": "main",  "label": "Living Room",    "exterior": false, "x": 4.496, "z": 5.944,  "w": 3.683, "d": 3.683, "color": "#6ea87a" },
+    { "id": "living",      "level": "main",  "label": "Living Room",    "exterior": false, "x": 4.496, "z": 5.944,  "w": 3.683, "d": 2.514, "color": "#6ea87a" },
 
     { "id": "patio",       "level": "lower", "label": "Patio",          "exterior": true,  "x": 0.0,   "z": -5.512, "w": 9.398, "d": 5.512, "color": "#4a5a6a" },
     { "id": "rec_room",    "level": "lower", "label": "Rec Room",       "exterior": false, "x": 0.0,   "z": 0.0,    "w": 3.378, "d": 6.477, "color": "#6ea87a" },
@@ -23,9 +25,9 @@
     { "id": "storage",     "level": "lower", "label": "Storage",        "exterior": false, "x": 8.636, "z": 0.0,    "w": 3.785, "d": 2.972, "color": "#7a7a7a" },
     { "id": "laundry",     "level": "lower", "label": "Laundry",        "exterior": false, "x": 3.378, "z": 1.854,  "w": 1.981, "d": 1.397, "color": "#4a7a9a" },
     { "id": "flex_area",   "level": "lower", "label": "Flex Area",      "exterior": false, "x": 5.359, "z": 3.2,    "w": 3.683, "d": 4.42,  "color": "#8a6ea5" },
-    { "id": "office",      "level": "lower", "label": "Office",         "exterior": false, "x": 0.0,   "z": 6.477,  "w": 2.235, "d": 2.819, "color": "#c98a3f" },
-    { "id": "foyer",       "level": "lower", "label": "Foyer",          "exterior": false, "x": 2.235, "z": 6.477,  "w": 1.981, "d": 1.245, "color": "#666666" },
-    { "id": "other",       "level": "lower", "label": "Other",          "exterior": false, "x": 4.216, "z": 6.477,  "w": 3.683, "d": 1.829, "color": "#666666" },
+    { "id": "office",      "level": "lower", "label": "Office",         "exterior": false, "x": 0.0,   "z": 6.477,  "w": 2.235, "d": 1.981, "color": "#c98a3f" },
+    { "id": "foyer",       "level": "lower", "label": "Foyer",          "exterior": false, "x": 2.235, "z": 6.477,  "w": 1.981, "d": 1.981, "color": "#666666" },
+    { "id": "other",       "level": "lower", "label": "Other",          "exterior": false, "x": 4.216, "z": 6.477,  "w": 3.683, "d": 2.581, "color": "#666666" },
     { "id": "shed",        "level": "lower", "label": "Shed",           "exterior": true,  "x": 8.636, "z": -2.032, "w": 3.226, "d": 2.032, "color": "#4a5a6a" }
   ]
 }
