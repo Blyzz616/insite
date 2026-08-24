@@ -6,6 +6,17 @@ import * as THREE from "three";
 const WS_URL = `ws://${location.hostname}:8765`;
 const FLOORPLAN_URL = "../config/floorplan.json";
 
+// The floorplan's east/west orientation looked mirrored versus the real
+// house once rendered, making it hard to correlate the map with actual
+// walking-around orientation. Flip x here rather than touching the raw
+// data in floorplan.json/node_positions.json, so those files stay a
+// faithful record of the source measurements. Set to false to go back
+// to unmirrored.
+const MIRROR_X = true;
+function wx(x) {
+  return MIRROR_X ? -x : x;
+}
+
 // ---------------------------------------------------------------------
 // SCENE SETUP
 // ---------------------------------------------------------------------
@@ -108,7 +119,7 @@ function buildFloorplan(data) {
       depthWrite: false,
     });
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(cx, cy, cz);
+    mesh.position.set(wx(cx), cy, cz);
     group.add(mesh);
 
     const edges = new THREE.EdgesGeometry(geo);
@@ -121,7 +132,7 @@ function buildFloorplan(data) {
 
     // Floor-level room label
     const label = makeRoomLabelSprite(room.label);
-    label.position.set(cx, yBase + 0.05, cz);
+    label.position.set(wx(cx), yBase + 0.05, cz);
     group.add(label);
 
     minX = Math.min(minX, room.x); maxX = Math.max(maxX, room.x + room.w);
@@ -133,7 +144,7 @@ function buildFloorplan(data) {
   const spanX = maxX - minX, spanZ = maxZ - minZ;
   const gridSize = Math.max(spanX, spanZ) * 1.6;
   const grid = new THREE.GridHelper(gridSize, 20, 0x334455, 0x1a2230);
-  grid.position.set((minX + maxX) / 2, minY, (minZ + maxZ) / 2);
+  grid.position.set(wx((minX + maxX) / 2), minY, (minZ + maxZ) / 2);
   group.add(grid);
 
   return {
@@ -263,8 +274,8 @@ function updatePersonMarker(person) {
   }
 
   const [x, y, z] = person.position;
-  entry.mesh.position.set(x, y, z);
-  entry.sprite.position.set(x, y + 1.9, z);
+  entry.mesh.position.set(wx(x), y, z);
+  entry.sprite.position.set(wx(x), y + 1.9, z);
 
   const breathLine = person.breath_rate_bpm != null
     ? `Breath: ${person.breath_rate_bpm} bpm`
@@ -322,7 +333,7 @@ function handleState(state) {
       nodeMarkers.set(nodeId, mesh);
     }
     const [x, y, z] = entry.position;
-    mesh.position.set(x, y, z);
+    mesh.position.set(wx(x), y, z);
     mesh.material.color.setHex(nodeColorForState(entry));
     mesh.material.emissive.setHex(entry.presence ? 0x113322 : 0x111111);
   }
@@ -351,9 +362,10 @@ async function init() {
   scene.add(group);
 
   // Point the orbit camera at the actual center of the loaded floorplan
-  // instead of the old hardcoded placeholder box.
+  // instead of the old hardcoded placeholder box. Mirror x here too so
+  // orbiting stays centered on the (now-flipped) house.
   center.set(
-    (bounds.minX + bounds.maxX) / 2,
+    wx((bounds.minX + bounds.maxX) / 2),
     (bounds.minY + bounds.maxY) / 2,
     (bounds.minZ + bounds.maxZ) / 2
   );
