@@ -1,0 +1,29 @@
+# Changelog
+
+Versioning starts here — no history before this point was tracked.
+Scheme: `X.Y.Z` where X = breaking change, Y = new feature, Z = fix/patch.
+Ask before assuming the next number; check this file for the last one
+shipped rather than guessing.
+
+Version currently only tracks `frontend/app.js` (shown live in the HUD
+in the bottom-left corner — that's the fastest way to confirm what's
+actually deployed, faster than digging through git history or raw
+GitHub URLs). Server/firmware versioning can be folded in the same way
+later if useful.
+
+## 0.2.0 — 2026-08-23
+- Fixed: office's south wall now flush under primary bedroom's (was
+  protruding ~0.84m/2.75ft past it) — `config/floorplan.json`
+- Fixed: orbit drag direction, exposed as a single `ROTATE_DIRECTION`
+  constant in `app.js` so it's a one-line flip if still wrong, rather
+  than another guess-and-redeploy cycle
+- Added: version tag displayed in the HUD, to make "did the last
+  deploy actually land" verifiable at a glance
+- Reverted: an earlier `MIRROR_X` east/west data flip that was the
+  wrong fix for what turned out to be a control-direction issue, not a
+  layout issue
+
+## 0.1.0 — earlier (untracked)
+- Initial floorplan.json + Three.js frontend replacing the placeholder
+  box shell
+- Proxmox CT bootstrap scripts (`deploy/`)
