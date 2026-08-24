@@ -11,7 +11,7 @@
   "rooms": [
     { "id": "deck",        "level": "main",  "label": "Deck",           "exterior": true,  "x": 0.0,   "z": -3.15,  "w": 8.915, "d": 3.15,  "color": "#4a5a6a" },
     { "id": "bed_nw",      "level": "main",  "label": "Candice's Room", "exterior": false, "x": 0.0,   "z": 0.0,    "w": 3.48,  "d": 2.896, "color": "#3a6ea5" },
-    { "id": "bath_main",   "level": "main",  "label": "Bath",           "exterior": false, "x": 3.48,  "z": 0.0,    "w": 2.591, "d": 3.531, "color": "#4a7a9a" },
+    { "id": "bath_main",   "level": "main",  "label": "Bath",           "exterior": false, "x": 3.48,  "z": 0.0,    "w": 2.591, "d": 1.854, "color": "#4a7a9a" },
     { "id": "kitchen",     "level": "main",  "label": "Kitchen",        "exterior": false, "x": 6.071, "z": 0.0,    "w": 2.997, "d": 3.734, "color": "#c98a3f" },
     { "id": "bed_mid",     "level": "main",  "label": "Jim's Room",     "exterior": false, "x": 0.0,   "z": 2.896,  "w": 3.48,  "d": 2.489, "color": "#3a6ea5" },
     { "id": "dining",      "level": "main",  "label": "Dining Room",    "exterior": false, "x": 5.359, "z": 3.734,  "w": 3.683, "d": 2.413, "color": "#8a6ea5" },
