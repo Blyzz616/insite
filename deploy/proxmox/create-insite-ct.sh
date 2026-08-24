@@ -6,7 +6,10 @@
 # Creates an unprivileged Debian 12 LXC, installs InSite's server deps,
 # clones the repo, and wires up systemd + nginx.
 #
-# Interactive (via whiptail): CTID, root password, timezone.
+# Interactive (via whiptail): CTID, root password, timezone, and the
+# two storage pools (container rootfs + OS template) — queried live
+# from this host rather than assumed, since storage naming varies
+# (local-lvm, local-zfs, or custom ZFS pool names).
 # Everything else is either a fixed default or an env var override —
 # see below. CPU/RAM/disk are intentionally NOT prompted for or exposed
 # as env vars to think about each run — fixed sensible defaults for
@@ -39,8 +42,8 @@ MEMORY_MB="${MEMORY_MB:-1024}"          # hardcoded, not prompted
 SWAP_MB="${SWAP_MB:-512}"
 BRIDGE="${BRIDGE:-vmbr0}"
 IP_CONFIG="${IP_CONFIG:-dhcp}"          # e.g. "192.168.0.204/24,gw=192.168.0.1" for static
-ROOTFS_STORAGE="${ROOTFS_STORAGE:-local-lvm}"
-TEMPLATE_STORAGE="${TEMPLATE_STORAGE:-local}"
+ROOTFS_STORAGE="${ROOTFS_STORAGE:-}"    # prompted via whiptail below unless set
+TEMPLATE_STORAGE="${TEMPLATE_STORAGE:-}" # prompted via whiptail below unless set
 UNPRIVILEGED="${UNPRIVILEGED:-1}"
 REPO_URL="${REPO_URL:-https://github.com/Blyzz616/insite.git}"
 INSTALL_SCRIPT_URL="${INSTALL_SCRIPT_URL:-https://raw.githubusercontent.com/Blyzz616/insite/main/deploy/proxmox/install-insite.sh}"
@@ -117,6 +120,48 @@ TIMEZONE_INPUT=$(whiptail --backtitle "$WT_BACKTITLE" --title "Timezone" \
   --inputbox "Timezone (IANA name, e.g. America/Vancouver):" 9 58 "$TIMEZONE" 3>&1 1>&2 2>&3) \
   || { msg_err "Cancelled."; exit 1; }
 TIMEZONE="$TIMEZONE_INPUT"
+
+# Storage pools — queried live from this host rather than assumed, since
+# storage naming varies a lot (local-lvm, local-zfs, or custom pool names
+# like rpool/Kara/Mist). `pvesm status --content <type>` only lists
+# storages that actually support that content type, so the menu can't
+# offer something that would fail at pct create time.
+get_storage_options() {
+  # tab-separated: name<TAB>"type, NNG free"
+  pvesm status --content "$1" 2>/dev/null | awk 'NR>1 {
+    avail_gb = $6/1024/1024
+    printf "%s\t%s, %.0fG free\n", $1, $2, avail_gb
+  }'
+}
+
+select_storage() {
+  local content_type="$1" title="$2" default="$3"
+  local opts=() names=()
+  while IFS=$'\t' read -r name desc; do
+    [[ -z "$name" ]] && continue
+    opts+=("$name" "$desc")
+    names+=("$name")
+  done < <(get_storage_options "$content_type")
+
+  if [[ ${#names[@]} -eq 0 ]]; then
+    msg_err "No storage on this host has content type '$content_type' enabled — check Datacenter > Storage in the Proxmox UI."
+    exit 1
+  fi
+
+  local wt_args=(--backtitle "$WT_BACKTITLE" --title "$title" --menu "Choose storage:" 16 64 6)
+  for n in "${names[@]}"; do
+    if [[ "$n" == "$default" ]]; then
+      wt_args+=(--default-item "$default")
+      break
+    fi
+  done
+  whiptail "${wt_args[@]}" "${opts[@]}" 3>&1 1>&2 2>&3
+}
+
+ROOTFS_STORAGE=$(select_storage rootdir "Container Storage" "$ROOTFS_STORAGE") \
+  || { msg_err "Cancelled."; exit 1; }
+TEMPLATE_STORAGE=$(select_storage vztmpl "Template Storage" "$TEMPLATE_STORAGE") \
+  || { msg_err "Cancelled."; exit 1; }
 
 # ---------------------------------------------------------------------
 # Find / download a Debian 12 template
