@@ -1,18 +1,23 @@
 import * as THREE from "three";
 
 // ---------------------------------------------------------------------
+// VERSION — bump this on every change to frontend/app.js. Shown in the
+// HUD so you can confirm at a glance whether a deploy actually landed,
+// instead of guessing from a git pull that silently no-opped.
+// ---------------------------------------------------------------------
+const APP_VERSION = "0.2.0";
+
+// ---------------------------------------------------------------------
 // CONFIG
 // ---------------------------------------------------------------------
 const WS_URL = `ws://${location.hostname}:8765`;
 const FLOORPLAN_URL = "../config/floorplan.json";
 
-// The floorplan's east/west orientation looked mirrored versus the real
-// house once rendered, making it hard to correlate the map with actual
-// walking-around orientation. Flip x here rather than touching the raw
-// data in floorplan.json/node_positions.json, so those files stay a
-// faithful record of the source measurements. Set to false to go back
-// to unmirrored.
-const MIRROR_X = true;
+// The floorplan/marker mirror below is OFF by default — it was a wrong
+// fix for a drag-direction complaint (see mousemove handler below for
+// the actual fix). Left here disabled in case a genuine east/west data
+// mirror is ever needed later.
+const MIRROR_X = false;
 function wx(x) {
   return MIRROR_X ? -x : x;
 }
@@ -66,7 +71,11 @@ window.addEventListener("mousemove", (e) => {
   if (!isDragging) return;
   const dx = e.clientX - prevMouse.x;
   const dy = e.clientY - prevMouse.y;
-  cameraAngle.theta -= dx * 0.005;
+  // ROTATE_DIRECTION: if dragging left still spins the view right (or
+  // vice versa), this is the ONLY thing to flip — change 1 to -1 below,
+  // save, git pull, hard-refresh. No need to wait on another round trip.
+  const ROTATE_DIRECTION = 1;
+  cameraAngle.theta -= ROTATE_DIRECTION * dx * 0.005;
   cameraAngle.phi = Math.min(Math.max(cameraAngle.phi - dy * 0.005, 0.1), Math.PI - 0.1);
   prevMouse = { x: e.clientX, y: e.clientY };
   updateCameraFromOrbit();
@@ -301,6 +310,8 @@ function pruneStalePersonMarkers(seenIds) {
 // WEBSOCKET
 // ---------------------------------------------------------------------
 const statusEl = document.getElementById("conn-status");
+const versionEl = document.getElementById("version-tag");
+if (versionEl) versionEl.textContent = `v${APP_VERSION}`;
 
 function connect() {
   const ws = new WebSocket(WS_URL);
