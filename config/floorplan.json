@@ -28,4 +28,5 @@
     { "id": "office",      "level": "lower", "label": "Office",         "exterior": false, "x": 0.0,   "z": 6.477,  "w": 2.235, "d": 1.981, "color": "#c98a3f" },
     { "id": "foyer",       "level": "lower", "label": "Foyer",          "exterior": false, "x": 2.235, "z": 6.477,  "w": 3.15,  "d": 1.981, "color": "#666666" },
     { "id": "other",       "level": "lower", "label": "Other",          "exterior": false, "x": 5.385, "z": 6.477,  "w": 3.683, "d": 2.581, "color": "#666666" }
+  ]
 }
