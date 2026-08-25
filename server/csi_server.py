@@ -190,6 +190,34 @@ async def broadcast_loop(server: CSIServer, interval_s: float = 0.2):
         await asyncio.sleep(interval_s)
 
 
+async def verbose_log_loop(server: CSIServer, interval_s: float = 0.5):
+    """
+    --verbose console output: one line per node, printed on a fixed
+    interval regardless of packet rate, so it's readable while you're
+    watching numbers change in real time (e.g. tuning the presence
+    threshold in processing/presence.py) rather than scrolling past a
+    line per CSI packet.
+    """
+    while True:
+        now = time.time()
+        for node_id, node in server.nodes.items():
+            if not node.last_result:
+                continue
+            stale = (now - node.last_seen) > 5.0 if node.last_seen else True
+            r = node.last_result
+            flag = "!" if stale else (" " if not r.get("presence") else "*")
+            breath = f"{r['breath_rate_bpm']:.1f}bpm" if r.get("breath_rate_bpm") is not None else "  -- "
+            print(
+                f"[{flag}] {node_id:12s} motion={r.get('motion_level', 0.0):6.3f}  "
+                f"presence={str(r.get('presence', False)):5s}  "
+                f"breath={breath}  conf={r.get('confidence', 0.0):.2f}  "
+                f"rssi={r.get('rssi', 0)}dBm"
+            )
+        if server.nodes:
+            print()  # blank line between ticks, easier to read
+        await asyncio.sleep(interval_s)
+
+
 def load_node_positions(path: str) -> dict[str, list[float]]:
     with open(path) as f:
         return json.load(f)
@@ -203,6 +231,12 @@ async def main():
     )
     parser.add_argument("--udp-port", type=int, default=UDP_LISTEN_PORT)
     parser.add_argument("--ws-port", type=int, default=WS_PORT)
+    parser.add_argument(
+        "--verbose", action="store_true",
+        help="Print motion_level/presence/breath_rate/confidence per node "
+             "to the console twice a second — useful for tuning the "
+             "presence threshold in processing/presence.py while testing."
+    )
     args = parser.parse_args()
 
     node_positions = load_node_positions(args.positions)
@@ -214,6 +248,9 @@ async def main():
         local_addr=("0.0.0.0", args.udp_port),
     )
     print(f"[udp] listening for CSI packets on 0.0.0.0:{args.udp_port}")
+
+    if args.verbose:
+        asyncio.ensure_future(verbose_log_loop(server))
 
     async with websockets.serve(
         lambda ws: ws_handler(ws, server), "0.0.0.0", args.ws_port
